@@ -3,7 +3,6 @@ import time
 from bin.objective_function import objective_function
 from bin.neighbor_state import generate_neighbors
 
-
 class SteepestAscent:
     def __init__(self, initial_state, kapasitas, verbose=True):
         """
