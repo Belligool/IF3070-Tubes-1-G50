@@ -1,17 +1,13 @@
-import time
-import random
 from initializer import generate_initial_state
-from bin.objective_function import objective_function
-from bin.neighbor_state import generate_neighbors
-from bin.entity.barang import Barang
 from algorithm.hill_climbing.steepest_ascent.SteepestAscent import SteepestAscent
+from algorithm.genetic.Genetic import GeneticAlgorithm
 from algorithm.simulated_annealing.SimulatedAnnealing import SimulatedAnnealing
 from utils import load_input
 
 def main_menu():
     print("==================================START===================================")
     print(r"""
-    ________________________________________________
+    ___________________________________________________________________
                         
     IRASSHAIMASE! Selamat Datang di Bin Packing Optimizer!
 
@@ -22,7 +18,7 @@ def main_menu():
     ╚███╔███╔╝███████╗███████╗╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗
     ╚══╝╚══╝ ╚══════╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝      
                                                      
-    ________________________________________________
+    ___________________________________________________________________
     """)
 
     while True:
@@ -43,8 +39,6 @@ def main_menu():
         if pilihan == '1':
             print("\nAnda memilih Steepest Ascent Hill-Climbing.")
 
-            # ===============================
-            # Inisialisasi data barang dari file input
             filename = input("Masukkan nama file input (misal: input.json): ")
             kapasitas, barang_list = load_input(filename)
 
@@ -92,6 +86,27 @@ def main_menu():
             print("------------------------------\n")
 
 
+        elif pilihan == '2':
+            print("\nAnda memilih Simulated Annealing.")
+            print("Fitur ini masih dalam pengembangan. Silakan coba algoritma lain.")
+
+        elif pilihan == '3':
+            print("\nAnda memilih Genetic Algorithm.")
+
+            filename = input("Masukkan nama file input (misal: input.json): ")
+            kapasitas, barang_list = load_input(filename)
+
+            # ===============================
+            # Buat state awal
+            # ===============================
+            initial_state = generate_initial_state(barang_list, kapasitas)
+
+            # ===============================
+            # Jalankan algoritma
+            # ===============================
+            ga = GeneticAlgorithm(initial_state, kapasitas)
+            ga.run()
+
         elif pilihan == '4':
             print("Terima kasih telah menggunakan program ini. Keluar...")
             break
@@ -102,7 +117,7 @@ def main_menu():
 if __name__ == "__main__":
     main_menu()
     print(r"""
-    ________________________________________________
+    _______________________________________________________________________________
                         
     SAYONARA! Terima kasih telah menggunakan Bin Packing Optimizer!
           
@@ -113,6 +128,7 @@ if __name__ == "__main__":
        ██║   ██║  ██║██║  ██║██║ ╚████║██║  ██╗       ██║   ╚██████╔╝╚██████╔╝
        ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝       ╚═╝    ╚═════╝  ╚═════╝ 
                                                                                                  
-    ________________________________________________
+    ________________________________________________________________________________
     """)
+
     print("===========================END===========================")
