@@ -5,6 +5,7 @@ from bin.objective_function import objective_function
 from bin.neighbor_state import generate_neighbors
 from bin.entity.barang import Barang
 from algorithm.hill_climbing.steepest_ascent.SteepestAscent import SteepestAscent
+from algorithm.simulated_annealing.SimulatedAnnealing import SimulatedAnnealing
 from utils import load_input
 
 def main_menu():
@@ -57,6 +58,39 @@ def main_menu():
             # ===============================
             algo = SteepestAscent(initial_state, kapasitas)
             algo.run()  
+        
+        elif pilihan == '2':
+            print("\nAnda memilih Simulated Annealing.")
+            filename = input("Masukkan nama file input (misal: input.json): ")
+            try:
+                kapasitas, barang_list = load_input(filename)
+            except FileNotFoundError:
+                print(f"Error: File '{filename}' tidak ditemukan.")
+                continue
+
+            initial_state = generate_initial_state(barang_list, kapasitas)
+            print("\n--- 🏁 STATE AWAL ---")
+            print(initial_state)
+            print(f"Skor Awal: {objective_function(initial_state, kapasitas)}")
+            print("-----------------------\n")
+
+            try:
+                temp_awal = float(input("Masukkan Temperatur Awal (misal: 1000): "))
+                alpha = float(input("Masukkan Cooling Rate/Alpha (misal: 0.99): "))
+                n_iterations = int(input("Masukkan Jumlah Iterasi (misal: 10000): "))
+            except ValueError:
+                print("Error: Input tidak valid. Harap masukkan angka.")
+                continue
+        
+            algo = SimulatedAnnealing(initial_state, kapasitas, temp_awal, alpha, n_iterations)
+            best_state, best_score, scores_history, temp_history, prob_history = algo.run()
+
+            print("\n--- 🏆 STATE AKHIR (HASIL) ---")
+            print(best_state)
+            print(f"Total Kontainer: {best_state.total_kontainer()}")
+            print(f"Skor Akhir Terbaik: {best_score}")
+            print("------------------------------\n")
+
 
         elif pilihan == '4':
             print("Terima kasih telah menggunakan program ini. Keluar...")
