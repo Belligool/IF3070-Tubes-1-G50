@@ -1,6 +1,7 @@
 import math
 import random
 import time
+import matplotlib.pyplot as plt
 from bin.state import State
 from bin.entity.kontainer import Kontainer
 from bin.objective_function import objective_function as evaluate
@@ -21,7 +22,9 @@ class SimulatedAnnealing:
         self.temp_history = [self.temp_awal]
         self.prob_history = []
 
-    def get_random_neighbour(self, state):
+        self.current_scores_history = [self.current_eval]
+
+    def get_random_neighbour(self, state    ):
         new_state = state.clone()
         kontainers = new_state.kontainer_list
 
@@ -64,6 +67,31 @@ class SimulatedAnnealing:
         
         return new_state
     
+    def _plot_scores(self):
+        plt.figure(figsize=(12, 7))
+        
+        # Plot Best Score
+        plt.plot(self.scores_history, 
+                 label="Best Score", 
+                 color="blue", 
+                 linewidth=2)
+        
+        # Plot Current Score
+        plt.plot(self.current_scores_history, 
+                 label="Current Score", 
+                 color="red", 
+                 alpha=0.5,
+                 linewidth=1)
+        
+        plt.title("Best Score vs Current Score")
+        plt.xlabel("Iteration")
+        plt.ylabel("Score")
+        plt.legend()
+        plt.grid(True)
+        print("Menampilkan Plot Skor (Best vs Current)...")
+        plt.show()
+
+
     def run(self):
         print("--- Memulai Simulated Annealing ---")
         start_time = time.time()
@@ -92,14 +120,20 @@ class SimulatedAnnealing:
                         prob = 0
             t *= self.alpha
             self.scores_history.append(self.best_eval)
+            self.current_scores_history.append(self.current_eval)   
             self.temp_history.append(t)
 
-            if i % (self.n_iterations // 20) == 0:
-                print(f"Iter: {i:>5} / {self.n_iterations}, Temp {t:8.3f}, Best {self.best_eval:8.2f}, Current {self.current_eval:8.2f}")
+            print(f"Iter: {i:>5} / {self.n_iterations}, Temp {t:8.3f}, Best {self.best_eval:8.2f}, Current {self.current_eval:8.2f}")
         
         end_time = time.time()
         print("--- Simulated Annealing Selesai!!! ---")
         print(f"Durasi: {end_time - start_time:.4f} detik.")
         print(f"Best score: {self.best_eval}")
+
+        # ==================================
+        # Plot
+        # ==================================
+        print("Tutup window plot agar program berjalan lagi.")
+        self._plot_scores()
 
         return self.best_state, self.best_eval, self.scores_history, self.temp_history, self.prob_history
