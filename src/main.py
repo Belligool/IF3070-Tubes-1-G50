@@ -79,7 +79,7 @@ def main_menu():
             algo = SimulatedAnnealing(initial_state, kapasitas, temp_awal, alpha, n_iterations)
             best_state, best_score, scores_history, temp_history, prob_history = algo.run()
 
-            print("\n--- 🏆 STATE AKHIR (HASIL) ---")
+            print("\n--- STATE AKHIR (HASIL) ---")
             print(best_state)
             print(f"Total Kontainer: {best_state.total_kontainer()}")
             print(f"Skor Akhir Terbaik: {best_score}")
