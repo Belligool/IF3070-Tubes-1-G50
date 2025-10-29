@@ -19,13 +19,14 @@ class GeneticAlgorithm:
         self.population_size = int(input("Masukkan jumlah populasi: "))
         self.max_iterasi = int(input("Masukkan banyak iterasi (generasi): "))
         self.mutation_rate = float(input("Masukkan probabilitas mutasi (contoh: 0.1): "))
-        self.verbose = True
 
         # === Variabel internal ===
         self.population = []
         self.best_state = None
         self.best_value = float("inf")
-        self.history = []  # menyimpan objective terbaik per iterasi
+        self.best_history = [] # objective terbaik tiap iterasi
+        self.avg_history = [] # rata-rata objective tiap iterasi
+        self.history = []  # catatan nilai objective tiap iterasi
 
     def initialize_population(self):
         self.population = [deepcopy(self.initial_state)]
@@ -62,29 +63,85 @@ class GeneticAlgorithm:
         return child1, child2
 
     def mutate(self, state):
-        if random.random() < self.mutation_rate:
-            neighbors = generate_neighbors(state)
-            if neighbors:
-                return random.choice(neighbors)
-        return state
+        if random.random() > self.mutation_rate:
+            return state   # tidak terjadi mutasi
+
+        new_state = deepcopy(state)
+        kontainer_list = new_state.kontainer_list
+
+        # pilih barang acak
+        # cari kontainer sumber yang tidak kosong
+        sumber = random.choice([k for k in kontainer_list if k.isi])
+
+        barang = random.choice(sumber.isi)
+
+        mutation_type = random.randint(1,3)
+
+        # ========== 1. Pindahkan barang ke kontainer lain ==============
+        if mutation_type == 1:
+            tujuan = random.choice(kontainer_list)
+            if tujuan != sumber:
+                sumber.hapus_barang(barang)
+                if not tujuan.tambah_barang(barang):
+                    sumber.tambah_barang(barang)
+
+        # ======= 2. Tukar barang antar dua kontainer ==================
+        elif mutation_type == 2:
+            kontainer_lain = random.choice([k for k in kontainer_list if k != sumber and k.isi])
+            barang_lain = random.choice(kontainer_lain.isi)
+
+            # swap
+            sumber.hapus_barang(barang)
+            kontainer_lain.hapus_barang(barang_lain)
+
+            # coba tukar
+            if sumber.tambah_barang(barang_lain) and kontainer_lain.tambah_barang(barang):
+                pass
+            else:
+                sumber.tambah_barang(barang)
+                kontainer_lain.tambah_barang(barang_lain)
+
+        # =========== 3. Pindahkan ke kontainer baru ====================
+        elif mutation_type == 3:
+            from bin.entity.kontainer import Kontainer
+            sumber.hapus_barang(barang)
+            kontainer_baru = Kontainer(self.kapasitas)
+            kontainer_baru.tambah_barang(barang)
+            kontainer_list.append(kontainer_baru)
+
+        # hapus kontainer kosong
+        for k in kontainer_list[:]:
+            if len(k.isi) == 0:
+                kontainer_list.remove(k)
+
+        return new_state
 
     def run(self):
-        print("\n=== Genetic Algorithm ===")
+        print("\n==============================")
+        print("      GENETIC ALGORITHM         ")
+        print("================================")
+
         self.initialize_population()
         start_time = time.time()
 
         for i in range(self.max_iterasi):
             scored = [(ind, objective_function(ind, self.kapasitas)) for ind in self.population]
-            scored.sort(key=lambda x: x[1])
-            best_state, best_val = scored[0]
-            self.history.append(best_val)
+            scored.sort(key=lambda x: x[1])  # urutkan dari yang terbaik (penalti plg kecil)
 
+            # Nilai terbaik dan rata-rata
+            best_val = scored[0][1]
+            avg_val = sum(val for _, val in scored) / len(scored)
+
+            # Simpan ke history
+            self.best_history.append(best_val)
+            self.avg_history.append(avg_val)
+
+            # Update state terbaik global
             if best_val < self.best_value:
                 self.best_value = best_val
-                self.best_state = deepcopy(best_state)
+                self.best_state = deepcopy(scored[0][0])
 
-            if self.verbose:
-                print(f"Iterasi {i+1} | Objective terbaik: {best_val}")
+            print(f"Iterasi {i+1} | Best: {best_val} | Avg: {avg_val}")
 
             new_population = []
             while len(new_population) < self.population_size:
@@ -96,23 +153,28 @@ class GeneticAlgorithm:
 
         elapsed_time = time.time() - start_time
 
-        print("\n=== Hasil Akhir ===")
+        print("\n========= HASIL AKHIR =========")
+        print("State terbaik:")
         print(self.best_state)
-        print(f"Nilai Objective Terbaik : {self.best_value}")
-        print(f"Jumlah Iterasi          : {self.max_iterasi}")
-        print(f"Jumlah Populasi         : {self.population_size}")
-        print(f"Probabilitas Mutasi     : {self.mutation_rate}")
-        print(f"Waktu Eksekusi          : {elapsed_time:.2f} detik")
+        print("\nDetail Eksekusi:")
+        print(f"{'Objective Terbaik':25s}: {self.best_value}")
+        print(f"{'Jumlah Iterasi':25s}: {self.max_iterasi}")
+        print(f"{'Jumlah Populasi':25s}: {self.population_size}")
+        print(f"{'Probabilitas Mutasi':25s}: {self.mutation_rate}")
+        print(f"{'Waktu Eksekusi':25s}: {elapsed_time:.4f} detik")
+        print("=" * 32)
 
         self.show_plot()
         return self.best_state, self.best_value, elapsed_time
 
     def show_plot(self):
         plt.figure(figsize=(10, 6))
-        plt.plot(self.history, color="green", marker="o", linewidth=2)
-        plt.title("Perkembangan Nilai Objective Function per Iterasi")
+        plt.plot(self.best_history, marker="o", label="Nilai Objective Terbaik (Min)")
+        plt.plot(self.avg_history, marker="x", label="Rata-rata Objective per Iterasi")
+        plt.title("Perkembangan Objective Function per Iterasi")
         plt.xlabel("Iterasi")
-        plt.ylabel("Objective Function (semakin kecil semakin baik)")
+        plt.ylabel("Objective Function (Penalti)")
+        plt.legend()
         plt.grid(True, linestyle="--", linewidth=0.5)
         plt.tight_layout()
         plt.show()
