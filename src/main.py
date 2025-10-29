@@ -85,11 +85,6 @@ def main_menu():
             print(f"Skor Akhir Terbaik: {best_score}")
             print("------------------------------\n")
 
-
-        elif pilihan == '2':
-            print("\nAnda memilih Simulated Annealing.")
-            print("Fitur ini masih dalam pengembangan. Silakan coba algoritma lain.")
-
         elif pilihan == '3':
             print("\nAnda memilih Genetic Algorithm.")
 
