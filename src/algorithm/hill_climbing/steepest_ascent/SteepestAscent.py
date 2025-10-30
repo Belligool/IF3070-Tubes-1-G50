@@ -8,7 +8,6 @@ class SteepestAscent:
         self.current_state = initial_state
         self.kapasitas = kapasitas
         self.current_value = objective_function(initial_state, kapasitas)
-        # Simpan nilai objective awal sebagai iterasi ke-0
         self.objective_values = [self.current_value]
 
     def search_best_neighbor(self):
@@ -42,8 +41,6 @@ class SteepestAscent:
                 self.current_state = best_neighbor
                 self.current_value = best_value
                 total_iteration += 1
-
-                # Hanya log saat ada perbaikan
                 self.objective_values.append(self.current_value)
 
                 print(
@@ -51,14 +48,13 @@ class SteepestAscent:
                     f"(Kontainer: {len(self.current_state.kontainer_list)})"
                 )
             else:
-                # Tidak ada perbaikan lagi (local optimum)
                 break
 
         elapsed_time = time.time() - start_time
 
         print("\n==============================")
-        print("STATE AKHIR STEEPEST ASCENT")
-        print("==============================")
+        print("  STATE AKHIR STEEPEST ASCENT   ")
+        print("================================")
         print(self.current_state)
         print(f"Nilai Objective Akhir : {self.current_value}")
         print(f"Total Kontainer       : {len(self.current_state.kontainer_list)}")
@@ -71,7 +67,7 @@ class SteepestAscent:
         return self.current_state, self.current_value, elapsed_time
 
     @staticmethod
-    def show_plot(objective_values, title="Perkembangan Nilai Objective Function"):
+    def show_plot(objective_values, title="Perkembangan Objective Value per Iterasi"):
         if len(objective_values) < 2:
             print("Tidak cukup data untuk menampilkan grafik (solusi tidak membaik).")
             return
@@ -87,7 +83,7 @@ class SteepestAscent:
         )
         plt.title(title)
         plt.xlabel("Iteration")
-        plt.ylabel("Objective Function")
+        plt.ylabel("Objective Value")
         plt.grid(True, linestyle="--", linewidth=0.5)
         plt.legend()
         plt.tight_layout()
