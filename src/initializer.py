@@ -1,10 +1,8 @@
 from bin.entity.kontainer import Kontainer
 from bin.state import State
 
+# Generate initial state dengan First Fit Decreasing (FFD) heuristic.
 def generate_initial_state(barang_list, kapasitas):
-    """
-    Generate initial state dengan First Fit Decreasing (FFD) heuristic.
-    """
     kontainer_list = [Kontainer(kapasitas)]
     for barang in barang_list:
         placed = False
