@@ -20,7 +20,6 @@ class GeneticAlgorithm:
         self.max_iterasi = int(input("Masukkan banyak iterasi (generasi): "))
         self.mutation_rate = float(input("Masukkan probabilitas mutasi (contoh: 0.1): "))
 
-        # === Variabel internal ===
         self.population = []
         self.best_state = None
         self.best_value = float("inf")
@@ -77,7 +76,7 @@ class GeneticAlgorithm:
 
         mutation_type = random.randint(1,3)
 
-        # ========== 1. Pindahkan barang ke kontainer lain ==============
+        # ========== 1. Pindahkan barang ke kontainer lain =============
         if mutation_type == 1:
             tujuan = random.choice(kontainer_list)
             if tujuan != sumber:
@@ -85,7 +84,7 @@ class GeneticAlgorithm:
                 if not tujuan.tambah_barang(barang):
                     sumber.tambah_barang(barang)
 
-        # ======= 2. Tukar barang antar dua kontainer ==================
+        # ======= 2. Tukar barang antar dua kontainer ================
         elif mutation_type == 2:
             kontainer_lain = random.choice([k for k in kontainer_list if k != sumber and k.isi])
             barang_lain = random.choice(kontainer_lain.isi)
@@ -101,7 +100,7 @@ class GeneticAlgorithm:
                 sumber.tambah_barang(barang)
                 kontainer_lain.tambah_barang(barang_lain)
 
-        # =========== 3. Pindahkan ke kontainer baru ====================
+        # =========== 3. Pindahkan ke kontainer baru ==================
         elif mutation_type == 3:
             from bin.entity.kontainer import Kontainer
             sumber.hapus_barang(barang)
@@ -117,26 +116,25 @@ class GeneticAlgorithm:
         return new_state
 
     def run(self):
-        print("\n==============================")
-        print("      GENETIC ALGORITHM         ")
-        print("================================")
-
         self.initialize_population()
+
+        print("\n==============================")
+        print("STATE AWAL GENETIC ALGORITHM")
+        print("==============================")
+        print(self.initial_state)
+        print(f"Objective awal  : {objective_function(self.initial_state, self.kapasitas)}")
+        print(f"Jumlah kontainer: {len(self.initial_state.kontainer_list)}\n")
         start_time = time.time()
 
         for i in range(self.max_iterasi):
             scored = [(ind, objective_function(ind, self.kapasitas)) for ind in self.population]
-            scored.sort(key=lambda x: x[1])  # urutkan dari yang terbaik (penalti plg kecil)
+            scored.sort(key=lambda x: x[1])  
 
-            # Nilai terbaik dan rata-rata
             best_val = scored[0][1]
             avg_val = sum(val for _, val in scored) / len(scored)
 
-            # Simpan ke history
             self.best_history.append(best_val)
             self.avg_history.append(avg_val)
-
-            # Update state terbaik global
             if best_val < self.best_value:
                 self.best_value = best_val
                 self.best_state = deepcopy(scored[0][0])
@@ -153,7 +151,9 @@ class GeneticAlgorithm:
 
         elapsed_time = time.time() - start_time
 
-        print("\n========= HASIL AKHIR =========")
+        print("\n==============================")
+        print("STATE AWAL GENETIC ALGORITHM")
+        print("==============================")
         print("State terbaik:")
         print(self.best_state)
         print("\nDetail Eksekusi:")
@@ -169,11 +169,11 @@ class GeneticAlgorithm:
 
     def show_plot(self):
         plt.figure(figsize=(10, 6))
-        plt.plot(self.best_history, marker="o", label="Nilai Objective Terbaik (Min)")
+        plt.plot(self.best_history, marker="o", label="Objective Value (Min)")
         plt.plot(self.avg_history, marker="x", label="Rata-rata Objective per Iterasi")
-        plt.title("Perkembangan Objective Function per Iterasi")
+        plt.title("Perkembangan Objective Value per Iterasi")
         plt.xlabel("Iterasi")
-        plt.ylabel("Objective Function (Penalti)")
+        plt.ylabel("Objective Value")
         plt.legend()
         plt.grid(True, linestyle="--", linewidth=0.5)
         plt.tight_layout()
